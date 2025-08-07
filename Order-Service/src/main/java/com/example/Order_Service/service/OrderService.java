@@ -30,7 +30,7 @@ public class OrderService {
         List<OrderLineItems> orderLineItemsList = orderRequest.getOrderLineItemsDtoList().stream().map(this::mapToEntity).toList();
         order.setOrderLineItemsList(orderLineItemsList);
         List<String> skuCodes = orderLineItemsList.stream().map(OrderLineItems::getSkuCode).toList();
-        InventoryResponse[] inventoryResponses = webClient.get().uri("http://localhost:8082/api/inventory", UriBuilder -> UriBuilder.queryParam("skuCode", skuCodes).build()).retrieve().bodyToMono(InventoryResponse[].class).block();
+        InventoryResponse[] inventoryResponses = webClient.get().uri("http://Inventory-Service/api/inventory", UriBuilder -> UriBuilder.queryParam("skuCode", skuCodes).build()).retrieve().bodyToMono(InventoryResponse[].class).block();
         boolean allMatch = Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock);
         if(allMatch){
             orderRepository.save(order);
