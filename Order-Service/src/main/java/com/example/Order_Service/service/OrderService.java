@@ -22,7 +22,7 @@ import java.util.UUID;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
 
     public void placeOrder(OrderRequest orderRequest){
         Order order = new Order();
@@ -30,7 +30,7 @@ public class OrderService {
         List<OrderLineItems> orderLineItemsList = orderRequest.getOrderLineItemsDtoList().stream().map(this::mapToEntity).toList();
         order.setOrderLineItemsList(orderLineItemsList);
         List<String> skuCodes = orderLineItemsList.stream().map(OrderLineItems::getSkuCode).toList();
-        InventoryResponse[] inventoryResponses = webClient.get().uri("http://Inventory-Service/api/inventory", UriBuilder -> UriBuilder.queryParam("skuCode", skuCodes).build()).retrieve().bodyToMono(InventoryResponse[].class).block();
+        InventoryResponse[] inventoryResponses = webClientBuilder.build().get().uri("http://Inventory-Service/api/inventory", UriBuilder -> UriBuilder.queryParam("skuCode", skuCodes).build()).retrieve().bodyToMono(InventoryResponse[].class).block();
         boolean allMatch = Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock);
         if(allMatch){
             orderRepository.save(order);
